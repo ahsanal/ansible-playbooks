@@ -1,0 +1,90 @@
+---
+- name: Spin up multiple VMs in the same subnet
+  hosts: localhost
+  gather_facts: no
+  vars:
+    # vCenter information
+    vcenter_ip:
+    vcenter_username: "administrator@vsphere.local"
+    vcenter_password:
+    datacenter_name:
+    cluster_name:
+    vm_folder_name:
+    template_name:
+    # Specify the domain the VM will be joined to and the user credentials for this
+    domain_name:
+    domain_count_name:
+    domain_account_password:
+    # Password for local administrator account
+    local_admin_password:
+    # TCP/IP settings for VMs
+    port_group_name:
+    netmask:
+    gateway:
+    # Specify DNS servers below
+    dns_servers:
+      -
+      -
+    # Specify a list with the virtual machines that need to be spun up
+    vms:
+      - name:
+        IP:
+        memory_mb:
+        num_cpus:
+        num_cpus_per_socket:
+        vm_notes: "VM deployed with Ansible"
+        # Define a list with the virtual disks. The first one is for the C drive.
+        disks:
+          - size_gb:
+            # Specify the disk type - thin/eagerzeroedthick/None(default no eagerzero)
+            type:
+            datastore:
+      - name:
+        IP:
+        memory_mb:
+        num_cpus:
+        num_cpus_per_socket:
+        vm_notes: 
+        disks:
+          - size_gb:
+            type:
+            datastore:
+          - size_gb:
+            type:
+            datastore:
+  tasks:
+  - name: Spin up VMs from template
+    vmware_guest:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      validate_certs: False
+      name: "{{ item.name }}"
+      template: "{{ template_name }}"
+      datacenter: "{{ datacenter_name }}"
+      folder: "{{ vm_folder_name }}"
+      state: poweredon
+      cluster: "{{ cluster_name }}"
+      annotation: "{{ item.vm_notes }}"
+      hardware:
+        memory_mb: "{{ item.memory_mb }}"
+        num_cpus: "{{ item.num_cpus }}"
+        num_cpu_cores_per_socket: "{{ item.num_cpus_per_socket }}"
+      disk: "{{ item.disks }}"
+      networks:
+      - name: "{{ port_group_name }}"
+        ip: "{{ item.IP }}"
+        netmask: "{{ netmask }}"
+        gateway: "{{ gateway }}"
+        domain: "{{ domain_name }}"
+        type: static
+        dns_servers: "{{ dns_servers}}"
+      customization:
+        dns_servers: "{{ dns_servers}}"
+        hostname: "{{ item.name }}"
+        joindomain: "{{ domain_name }}"
+        domainadmin: "{{ domain_count_name }}"
+        domainadminpassword: "{{ domain_account_password }}"
+        password: "{{ local_admin_password}}"
+    loop: "{{ vms }}"
+    delegate_to: localhost  
