@@ -38,7 +38,7 @@
       password: "{{ vcenter_password }}"
       datacenter: "{{ datacenter_name }}"
       validate_certs: no
-      name: SEVTEST
+      name: "{{ vm_name }}"
       disk:
         - size_kb: "{{ item.value.capacity_in_kb + (item.value.capacity_in_kb*(percent_to_increase|int /100))|int }}"
           scsi_controller: "{{ item.value.controller_bus_number }}"
