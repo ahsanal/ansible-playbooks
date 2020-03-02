@@ -1,0 +1,58 @@
+---
+- name: Increase disk space
+  hosts: server_group_name
+  vars:
+    vcenter_ip: 10.10.10.10
+    vcenter_username: administrator@vsphere.local
+    vcenter_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          62888888888888888888888888888888888888888888888888888888888888888888888888888888
+          67777777777777777777777777777777777777777777777777777777777777777777777777777776
+          34444444444444444444444444444444444444444444444444444444444444444444444444444441
+          66666666666666666666666666666666666666666666666666666666666666666666666666666663
+          6531
+    datacenter_name: Datacenter_Name
+  tasks:
+  - name: Find serial number of disk using the specified partition letter
+    win_shell: |
+      $partition_info = Get-Partition -DriveLetter "{{ drive_letter }}" | Select DiskNumber, PartitionNumber
+      $disk_number = $partition_info.DiskNumber
+      $partition_number = $partition_info.PartitionNumber
+      $value = Get-WmiObject -Class Win32_DiskDrive | Select SerialNumber, Index | Where {$_.index -eq $disk_number}
+      echo $value.SerialNumber, $disk_number, $partition_number
+    register: os_disk
+  - name: Gather disk info from virtual machine
+    vmware_guest_disk_info:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      datacenter: AirbusGroup
+      validate_certs: no
+      name: "{{ vm_name }}"
+    delegate_to: localhost
+    register: vm_disk_info
+  - name: Increase the size of disk in VMware
+    vmware_guest_disk:
+      hostname: "{{ vcenter_ip }}"
+      username: "{{ vcenter_username }}"
+      password: "{{ vcenter_password }}"
+      datacenter: "{{ datacenter_name }}"
+      validate_certs: no
+      name: SEVTEST
+      disk:
+        - size_kb: "{{ item.value.capacity_in_kb + (item.value.capacity_in_kb*(percent_to_increase|int /100))|int }}"
+          scsi_controller: "{{ item.value.controller_bus_number }}"
+          unit_number: "{{ item.value.unit_number }}"
+          autoselect_datastore: True
+    delegate_to: localhost
+    when: item.value.backing_uuid|replace('-', '')|lower == os_disk.stdout_lines[0]|lower
+    loop: "{{ query('dict', vm_disk_info.guest_disk_info) }}"
+  - name: Updates cached information about the specified Disk object
+    win_shell: |
+      Update-Disk -Number "{{ os_disk.stdout_lines[1] }}"
+  - name: Resize partition to its maximum size
+    win_partition:
+      partition_size: -1
+      partition_number: "{{ os_disk.stdout_lines[2] }}"
+      disk_number: "{{ os_disk.stdout_lines[1] }}"
+ 
