@@ -10,7 +10,7 @@ First, I find the disk serial number inside the OS based on the drive letter and
 
 The disk is finally expanded in the VM and later inside the Windows OS. 
 
-Before running the script, update the vCenter information in the playbook (ip address, credentials and datacenter name). You also need to install the libraries specified below.  
+Before running the script, update the vCenter information in the playbook (IP address, credentials and datacenter name). You also need to install the libraries specified below.  
 
 *Requirements*
 * Install [pyVmomi](https://github.com/vmware/pyvmomi) 
