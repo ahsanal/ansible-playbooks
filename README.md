@@ -12,7 +12,7 @@ The disk is finally expanded in the VM and later inside the Windows OS.
 
 Before running the script, update the vCenter information in the playbook (ip address, credentials and datacenter name) 
 
-****Requirements****
+#### Requirements
 * Install [pyVmomi](https://github.com/vmware/pyvmomi) 
 * Install [Kerbereos Library](https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html#installing-the-kerberos-library) 
 * [Configure Kerberos](https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html#configuring-host-kerberos)
