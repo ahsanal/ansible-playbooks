@@ -2,7 +2,7 @@
 
 The ansible playbook [increase_vm_disk_size.yml](increase_vm_disk_size.yml) increases the size of a virtual disk in VMware and also in the Windows OS.  
 
-When you run the playbook you need to specify the name of the VM, the letter of the drive to expand and the percent you would like to increase it. 
+When you run the playbook you need to specify the name of the VM, the letter of the drive to expand and the percentage you would like to increase it. 
 ```
 ansible-playbook increase_vm_disk.yml -e 'vm_name=TEST_VM drive_letter=E percent_to_increase=10' --ask-vault
 ```
