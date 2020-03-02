@@ -40,7 +40,7 @@
       validate_certs: no
       name: "{{ vm_name }}"
       disk:
-        - size_kb: "{{ item.value.capacity_in_kb + (item.value.capacity_in_kb*(percent_to_increase|int /100))|int }}"
+        - size_gb: "{{ ((item.value.capacity_in_kb/1024)/1024)|int + (((item.value.capacity_in_kb/1024)/1024)*(percent_to_increase|int /100))|int }}"
           scsi_controller: "{{ item.value.controller_bus_number }}"
           unit_number: "{{ item.value.unit_number }}"
           autoselect_datastore: True
